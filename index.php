@@ -1,6 +1,37 @@
-<!-- IS SENDING A FORM -->
 <?php
 
+// IS RECEIVED SHORTCUT
+if (isset($_GET['q'])) {
+
+    // VARIABLE
+    $shortcut = htmlspecialchars($_GET['q']);
+
+    // IS A SHORTCUT ?
+    $bdd = new PDO('mysql:host=localhost;dbname=bitly;charset=utf8', 'root', '');
+    $req = $bdd->prepare('SELECT COUNT(*) AS x FROM links WHERE shortcut = ?');
+    $req->execute(array($shortcut));
+
+    while ($result = $req->fetch()) {
+
+        if ($result['x'] != 1) {
+            header('location: ../raccourcisseur/?error=true&message=Adresse url non connue');
+            exit();
+        }
+    }
+
+    // REDIRECTION
+    $req = $bdd->prepare('SELECT * FROM links WHERE shortcut = ?');
+    $req->execute(array($shortcut));
+
+    while ($result = $req->fetch()) {
+
+        header('location: ' . $result['url']);
+        exit();
+    }
+}
+
+
+//  IS SENDING A FORM 
 if (isset($_POST['url'])) {
     // variable
     $url = $_POST['url'];
@@ -12,7 +43,27 @@ if (isset($_POST['url'])) {
     }
 
     // shortcut
-    $shortcut = crypt($url, time());
+    $shortcut = crypt($url, rand());
+
+    // connexion à la base de données pour voir si le lien existe déja 
+    $bdd = new PDO('mysql:host=localhost;dbname=bitly;charset=utf8', 'root', '');
+    // vérification de l'url
+    $req = $bdd->prepare('SELECT COUNT(*) AS x FROM links WHERE url = ?');
+    $req->execute(array($url));
+
+    while ($result = $req->fetch()) {
+        // si le lien existe déjà
+        if ($result['x'] != 0) {
+            // si le lien existe déjà
+            header('location: ../raccourcisseur/?error=true&message=Adresse déjà raccourcie');
+            exit();
+        }
+    }
+    // sending the url to the database
+    $req = $bdd->prepare('INSERT INTO links (url, shortcut) VALUES (?,?)');
+    $req->execute(array($url, $shortcut));
+    header('location:../raccourcisseur/?short=' . $shortcut);
+    exit();
 }
 ?>
 
@@ -55,6 +106,16 @@ if (isset($_POST['url'])) {
                         <b><?php echo htmlspecialchars($_GET['message']); ?></b>
                     </div>
                 </div>
+            <?php } else if (isset($_GET['short'])) { ?>
+                <div class="center">
+                    <div id="result">
+                        <b>
+                            URL RACCOURCIE :
+                        </b>
+                        http://localhost/projects/raccourcisseur/?q=<?php echo htmlspecialchars($_GET['short']); ?>
+                    </div>
+                </div>
+
             <?php } ?>
         </div>
     </section>
