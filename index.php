@@ -1,3 +1,21 @@
+<!-- IS SENDING A FORM -->
+<?php
+
+if (isset($_POST['url'])) {
+    // variable
+    $url = $_POST['url'];
+    // vérification de l'url pour éviter les failles
+    if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        // PAS UN LIEN
+        header('location: ../raccourcisseur/?error=true&message=Adresse url non valide');
+        exit();
+    }
+
+    // shortcut
+    $shortcut = crypt($url, time());
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,18 +30,33 @@
 
 <body>
     <section id="hello">
-        <div class="container">
-            <header>
-                <img src="./images//logo.png" alt="logo" id="logo">
-            </header>
-        </div>
 
-        <h1>Une url longue ? Raccourcissez là !</h1>
-        <h2>Largement meilleur et plus court que les autres.</h2>
-        <form action="index.php" method="POST">
-            <input type="url" name="url" id="url" placeholder="Collez un lien à raccourcir">
-            <input type="submit" value="Raccourcir">
-        </form>
+        <!-- CONTAINER -->
+        <div class="container">
+
+            <!-- HEADER -->
+            <header>
+                <img src="images/logo.png" alt="logo" id="logo">
+            </header>
+
+            <!-- VP -->
+            <h1>Une url longue ? Raccourcissez-là ?</h1>
+            <h2>Largement meilleur et plus court que les autres.</h2>
+
+            <!-- FORM -->
+            <form method="post" action="../raccourcisseur/">
+                <input type="url" name="url" placeholder="Collez un lien à raccourcir">
+                <input type="submit" value="Raccourcir">
+            </form>
+
+            <?php if (isset($_GET['error']) && isset($_GET['message'])) { ?>
+                <div class="center">
+                    <div id="result">
+                        <b><?php echo htmlspecialchars($_GET['message']); ?></b>
+                    </div>
+                </div>
+            <?php } ?>
+        </div>
     </section>
     <section id="brands">
         <div class="container">

@@ -82,9 +82,20 @@ input[type="submit"] {
 
   margin-top: 30px;
 }
+#result {
+  color: white;
+  padding: 30px;
+  border: 1px solid white;
+  border-radius: 10px;
+  display: inline-block;
+  margin: 20px;
+}
 #brands {
   background: #eff7fc;
   padding: 30px;
+  text-align: center;
+}
+.center {
   text-align: center;
 }
 
